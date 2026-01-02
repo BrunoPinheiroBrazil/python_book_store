@@ -18,4 +18,4 @@ def obter_mensagem():
 # Roda o servidor se este arquivo for executado diretamente
 if __name__ == '__main__':
     # debug=True faz o servidor reiniciar sozinho se você mudar o código
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5002)
