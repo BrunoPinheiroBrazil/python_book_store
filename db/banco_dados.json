@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "titulo": "O Senhor dos Anéis e a Sociedade do Anel",
+        "descricao": "Primeira parte da saga do Senhor dos Anéis"
+    },
+    {
+        "id": 2,
+        "titulo": "O Senhor dos Anéis e as Dua Torres",
+        "descricao": "Segunda parte da saga do Senhor dos Anéis"
+    },
+    {
+        "id": 3,
+        "titulo": "O Senhor dos Anéis e o Retorno do Rei",
+        "descricao": "Terceira parte da saga do Senhor dos Anéis"
+    }
+]
