@@ -2,12 +2,12 @@ from flask import Blueprint, request, jsonify
 from ..services.livro_services import LivroService
 
 # Cria o Blueprint
-livro_bp = Blueprint('livros', __name__)
+controllers = Blueprint('livros', __name__)
 
 # Instancia o serviço
 service = LivroService()
 
-@livro_bp.route('/livros', methods=['GET'])
+@controllers.route('/livros', methods=['GET'])
 def obter_livros():
     """
     Lista todos os livros
@@ -45,7 +45,7 @@ def obter_livro(id_livro):
     resposta, status = service.pesquisar_por_id(id_livro)
     return jsonify(resposta), status
 
-@livro_bp.route('/livros', methods=['POST'])
+@controllers.route('/livros', methods=['POST'])
 def livros():
     """
     Cria um novo livro
