@@ -6,6 +6,26 @@ class LivroService:
         # Apenas repassa a lista do banco
         return ler_livros(), 200
 
+    def pesquisar_por_id(self, id_livro):
+        """
+        Pesquisa um livro específico pelo ID
+        """
+        try:
+            id_livro_int = int(id_livro)
+        except (ValueError, TypeError):
+            return {'erro': 'ID deve ser um número'}, 400
+        
+        if id_livro_int <= 0:
+            return {'erro': 'ID deve ser maior que 0'}, 400
+        
+        livros = ler_livros()
+        
+        for livro in livros:
+            if livro.get('id') == id_livro_int:
+                return livro, 200
+        
+        return {'erro': 'Livro não encontrado'}, 404
+
     def criar_novo(self, dados):
         # Extrai os dados
         id_livro = dados.get('id_livro')
