@@ -1,9 +1,10 @@
 from flask import Flask
 from flasgger import Swagger
-from .controllers.livro_controller import livro_bp
+from .controllers.livro_controller import controllers
 
-def create_app():
+def create_app() :
     app = Flask(__name__)
+    #agora vou adicionar uma feature de governança
     
     # Configura Swagger
     app.config['SWAGGER'] = {'title': 'Book Store API', 'uiversion': 3}
@@ -24,6 +25,6 @@ def create_app():
     Swagger(app, swagger_config)
     
     # Registra as rotas com prefixo /api
-    app.register_blueprint(livro_bp, url_prefix='/api')
+    app.register_blueprint(controllers, url_prefix='/api')
     
     return app

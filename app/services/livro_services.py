@@ -2,7 +2,7 @@ from ..repositories.persistence import ler_livros, salvar_livro
 from ..models.livro import Livro
 
 class LivroService:
-    def listar_todos(self):
+    def listar_todos(self): 
         # Apenas repassa a lista do banco
         return ler_livros(), 200
 
