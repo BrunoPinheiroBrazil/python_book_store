@@ -21,6 +21,30 @@ def obter_livros():
     resposta, status = service.listar_todos()
     return jsonify(resposta), status
 
+@livro_bp.route('/livros/<id_livro>', methods=['GET'])
+def obter_livro(id_livro):
+    """
+    Obtém um livro específico por ID
+    ---
+    tags:
+      - Livros
+    parameters:
+      - in: path
+        name: id_livro
+        type: integer
+        required: true
+        description: ID do livro
+    responses:
+      200:
+        description: Livro encontrado
+      400:
+        description: ID inválido
+      404:
+        description: Livro não encontrado
+    """
+    resposta, status = service.pesquisar_por_id(id_livro)
+    return jsonify(resposta), status
+
 @controllers.route('/livros', methods=['POST'])
 def livros():
     """
