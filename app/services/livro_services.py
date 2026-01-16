@@ -1,10 +1,10 @@
-from ..repositories.persistence import ler_livros, salvar_livro
+from ..repositories.persistence import banco
 from ..models.livro import Livro
 
 class LivroService:
     def listar_todos(self): 
         # Apenas repassa a lista do banco
-        return ler_livros(), 200
+        return banco.ler_livros(), 200
 
     def pesquisar_por_id(self, id_livro):
         """
@@ -18,7 +18,7 @@ class LivroService:
         if id_livro_int <= 0:
             return {'erro': 'ID deve ser maior que 0'}, 400
         
-        livros = ler_livros()
+        livros = banco.ler_livros()
         
         for livro in livros:
             if livro.get('id') == id_livro_int:
@@ -51,7 +51,7 @@ class LivroService:
             return {'erro':'descrição deve conter menos de 300 caracteres'}, 400
 
         # --- REGRA DE NEGÓCIO: DUPLICIDADE ---
-        livros_existentes = ler_livros()
+        livros_existentes = banco.ler_livros()
         for livro in livros_existentes:
             if livro.get('id') == id_livro_int:
                 return {'erro': 'Já existe um livro com este ID'}, 409 # Conflict
@@ -61,6 +61,17 @@ class LivroService:
         novo_livro = Livro(id_livro_int, titulo, descricao)
         
         # Chama a persistência passando o dicionário
-        salvar_livro(novo_livro.to_dict())
+        banco.salvar_livro(novo_livro.to_dict())
 
         return '', 201
+    
+    def apagar_livro_por_id(self, id_livro):
+        """
+        Apaga um livro específico pelo ID
+        """
+        removeu = banco.apagar_livro(id_livro)
+        
+        if removeu:
+            return '', 204
+        
+        return {'erro': 'Livro não encontrado'}, 404

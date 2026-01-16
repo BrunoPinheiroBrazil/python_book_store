@@ -21,7 +21,7 @@ def obter_livros():
     resposta, status = service.listar_todos()
     return jsonify(resposta), status
 
-@livro_bp.route('/livros/<id_livro>', methods=['GET'])
+@controllers.route('/livros/<id_livro>', methods=['GET'])
 def obter_livro(id_livro):
     """
     Obtém um livro específico por ID
@@ -78,3 +78,28 @@ def livros():
     
     # Se a resposta for vazia (caso do 201), jsonify lida bem
     return jsonify(resposta) if resposta else ('', status)
+
+@controllers.route('/livros/<id_livro>', methods=['DELETE']) #o nome do parâmetro na rota deve ser identico ao parametro no método.
+def deletar_livro(id_livro : int):
+    """
+    Apaga um livro específico pelo ID
+    ---
+    tags:
+      - Livros
+    parameters:
+      - in: path
+        name: id_livro
+        type: integer
+        required: true
+        description: ID do livro
+    responses:
+      200:
+        description: Livro deletado com sucesso
+      400:
+        description: ID inválido
+      404:
+        description: Livro não encontrado então não deletou nada
+    """
+    print("Recebido o request: Id_Livro -> " + id_livro)
+    resposta, status = service.apagar_livro_por_id(id_livro)
+    return jsonify(resposta), status
