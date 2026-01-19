@@ -103,3 +103,34 @@ def deletar_livro(id_livro : int):
     print("Recebido o request: Id_Livro -> " + id_livro)
     resposta, status = service.apagar_livro_por_id(id_livro)
     return jsonify(resposta), status
+
+@controllers.route('/livros/buscar', methods=['POST'])
+def buscar_livros_por_titulo():
+    """
+    Busca livros por título
+    ---
+    tags:
+      - Livros
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            titulo:
+              type: string
+              description: Título ou parte do título do livro a ser buscado.
+    responses:
+      200:
+        description: Lista de livros encontrados.
+      400:
+        description: Requisição inválida (título não fornecido).
+    """
+    dados = request.get_json()
+    titulo = dados.get('titulo')
+    if not titulo:
+      return jsonify({'erro': 'O campo "titulo" é obrigatório'}), 400
+
+    resposta, status = service.pesquisar_por_titulo(titulo)
+    return jsonify(resposta), status

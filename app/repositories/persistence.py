@@ -53,3 +53,12 @@ class banco:
         
         return True;
         
+    def buscar_livro_por_titulo(titulo: str):
+        """Busca livros que contêm o título especificado (case-insensitive)."""
+        lista_livros = banco.ler_livros()
+        titulo_lower = titulo.lower()
+        livros_encontrados = [
+            livro for livro in lista_livros 
+            if titulo_lower in livro.get('titulo', '').lower()
+        ]
+        return livros_encontrados

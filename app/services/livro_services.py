@@ -75,3 +75,9 @@ class LivroService:
             return '', 204
         
         return {'erro': 'Livro não encontrado'}, 404
+    
+    def pesquisar_por_titulo(self, titulo):
+        """
+        Pesquisa livros pelo título
+        """
+        return {'erro': 'Livro não encontrado'}, 404
