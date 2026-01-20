@@ -78,6 +78,10 @@ class LivroService:
     
     def pesquisar_por_titulo(self, titulo):
         """
-        Pesquisa livros pelo título
+        Pesquisa livros pelo título delegando para a persistência
         """
-        return {'erro': 'Livro não encontrado'}, 404
+        # Chama a função que já existe no arquivo persistence.py (image_2473a1.png)
+        livros_encontrados = banco.buscar_livro_por_titulo(titulo)
+
+        # Retorna a lista encontrada (mesmo que vazia) e status 200
+        return livros_encontrados, 200

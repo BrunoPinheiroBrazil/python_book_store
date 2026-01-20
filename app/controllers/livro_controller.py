@@ -131,6 +131,6 @@ def buscar_livros_por_titulo():
     titulo = dados.get('titulo')
     if not titulo:
       return jsonify({'erro': 'O campo "titulo" é obrigatório'}), 400
-
+    
     resposta, status = service.pesquisar_por_titulo(titulo)
     return jsonify(resposta), status

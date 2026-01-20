@@ -61,4 +61,6 @@ class banco:
             livro for livro in lista_livros 
             if titulo_lower in livro.get('titulo', '').lower()
         ]
+        if not titulo:
+            return [],200
         return livros_encontrados
