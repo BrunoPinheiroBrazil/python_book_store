@@ -22,7 +22,7 @@ jobs:
           python-version: '3.11' 
 
       # 3. Instala as dependências (certifique-se de ter um requirements.txt)
-      - name: Instalar dependências
+      - name: Instalar dependências necessária
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
@@ -31,7 +31,6 @@ jobs:
       # Usamos 'nohup' para garantir que o processo não morra e '&' para liberar o terminal
       - name: Iniciar API (main.py)
         run: |
-          
           nohup python main.py > api.log 2>&1 &
           echo "API iniciada em background. Aguardando 10 segundos..."
           sleep 10
@@ -45,7 +44,6 @@ jobs:
       # 6. Faz o Request GET para testar
       # O curl -f faz o step falhar se o status code não for 2xx
       # O curl -v mostra os detalhes no log
-      - name: Testar Endpoint (Health Check)
+      - name: Testar Endpoint (Get Livros)
         run: |
           curl -v -f http://localhost:5002/api/livros
-          # Troque a URL acima pela sua rota real (ex: /status, /, etc)
