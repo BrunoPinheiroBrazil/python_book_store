@@ -93,3 +93,43 @@ jobs:
               print(f'❌ Erro inesperado: {e}')
               sys.exit(1)
           "
+
+      # 8. Testes de Regra de Negócio (Busca com e sem resultados)
+      - name: Validar Cenários de Busca (Python vs Cobol)
+        run: |
+          python3 -c "
+          import sys, json, urllib.request, urllib.error
+
+          # AJUSTE AQUI SE SUA ROTA FOR DIFERENTE
+          # Assumindo que sua busca é via Query Param: /api/livros?titulo=...
+          BASE_URL = 'http://localhost:5002/api/livros'
+
+          def testar_cenario(termo_busca, deve_encontrar_itens):
+              # Monta a URL (ex: ...?titulo=Python)
+              # Se sua API usa barra (ex: /search/Python), ajuste a linha abaixo
+              url = f'{BASE_URL}?titulo={termo_busca}'
+              
+              print(f'🔍 [Cenário] Buscando por: \'{termo_busca}\'...')
+
+              try:
+                  with urllib.request.urlopen(url) as response:
+                      status_code = response.getcode()
+                      conteudo = json.loads(response.read().decode())
+
+                      # --- REGRA 1: Status deve ser SEMPRE 200 (mesmo vazio) ---
+                      if status_code != 200:
+                          print(f'❌ Falha: Status Code retornado foi {status_code}. Esperado: 200.')
+                          sys.exit(1)
+
+                      # --- REGRA 2: O retorno deve ser sempre uma Lista ---
+                      if not isinstance(conteudo, list):
+                          print('❌ Falha: O retorno da API não é um Array/Lista.')
+                          sys.exit(1)
+
+                      # --- REGRA 3: Validação específica do cenário ---
+                      qtd_itens = len(conteudo)
+                      
+                      if deve_encontrar_itens:
+                          # Cenário 1: Python (Esperamos itens)
+                          if qtd_itens > 0:
+                              titulo_primeiro = conteudo[0].get('titulo', '')
