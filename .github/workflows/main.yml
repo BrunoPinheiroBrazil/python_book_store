@@ -133,3 +133,33 @@ jobs:
                           # Cenário 1: Python (Esperamos itens)
                           if qtd_itens > 0:
                               titulo_primeiro = conteudo[0].get('titulo', '')
+                              print(f'✅ Sucesso: Encontrou {qtd_itens} livro(s). Primeiro: {titulo_primeiro}')
+                          else:
+                              print(f'❌ Falha: Esperava encontrar livros com \'{termo_busca}\', mas a lista veio vazia.')
+                              sys.exit(1)
+                      else:
+                          # Cenário 2: Cobol (Esperamos lista vazia, mas STATUS 200)
+                          if qtd_itens == 0:
+                              print('✅ Sucesso: Lista vazia retornada corretamente com Status 200.')
+                          else:
+                              print(f'❌ Falha: Esperava lista vazia para \'{termo_busca}\', mas vieram {qtd_itens} itens.')
+                              sys.exit(1)
+
+              except urllib.error.HTTPError as e:
+                  # Se a API retornar 404 na busca vazia, vai cair aqui e falhar o teste (como você queria)
+                  print(f'❌ Erro HTTP Fatal: {e.code} - {e.reason}. (Se foi 404, corrija sua API para retornar 200 e [])')
+                  sys.exit(1)
+              except Exception as e:
+                  print(f'❌ Erro Inesperado: {e}')
+                  sys.exit(1)
+              
+              print('---')
+
+          # --- EXECUÇÃO DOS CENÁRIOS ---
+          
+          # 1. Busca que DEVE ter sucesso (Python)
+          testar_cenario('Python', deve_encontrar_itens=True)
+
+          # 2. Busca que NÃO DEVE ter itens, mas DEVE ser 200 OK (Cobol)
+          testar_cenario('Cobol', deve_encontrar_itens=False)
+          "
