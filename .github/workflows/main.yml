@@ -94,25 +94,30 @@ jobs:
               sys.exit(1)
           "
 
-      # 8. Testes de Regra de Negócio (Busca com e sem resultados)
+      # 8. Testes de Regra de Negócio (Busca via POST com e sem resultados)
       - name: Validar Cenários de Busca (Python vs Cobol)
         run: |
           python3 -c "
           import sys, json, urllib.request, urllib.error
 
-          # AJUSTE AQUI SE SUA ROTA FOR DIFERENTE
-          # Assumindo que sua busca é via Query Param: /api/livros?titulo=...
-          BASE_URL = 'http://localhost:5002/api/livros'
+          BASE_URL = 'http://localhost:5002/api/livros/buscar'
 
           def testar_cenario(termo_busca, deve_encontrar_itens):
-              # Monta a URL (ex: ...?titulo=Python)
-              # Se sua API usa barra (ex: /search/Python), ajuste a linha abaixo
-              url = f'{BASE_URL}?titulo={termo_busca}'
-              
-              print(f'🔍 [Cenário] Buscando por: \'{termo_busca}\'...')
+              print(f'🔍 [Cenário POST] Buscando por: \'{termo_busca}\'...')
+
+              # 1. PREPARA O CORPO (JSON)
+              payload = {'titulo': termo_busca}
+              data_bytes = json.dumps(payload).encode('utf-8') # Converte p/ bytes
+
+              # 2. MONTA A REQUISIÇÃO
+              # O parâmetro 'data' força o urllib a usar POST automaticamente, 
+              # mas deixamos method='POST' explicito para garantir.
+              req = urllib.request.Request(BASE_URL, data=data_bytes, method='POST')
+              req.add_header('Content-Type', 'application/json') # Essencial!
 
               try:
-                  with urllib.request.urlopen(url) as response:
+                  # Envia o request
+                  with urllib.request.urlopen(req) as response:
                       status_code = response.getcode()
                       conteudo = json.loads(response.read().decode())
 
@@ -146,8 +151,7 @@ jobs:
                               sys.exit(1)
 
               except urllib.error.HTTPError as e:
-                  # Se a API retornar 404 na busca vazia, vai cair aqui e falhar o teste (como você queria)
-                  print(f'❌ Erro HTTP Fatal: {e.code} - {e.reason}. (Se foi 404, corrija sua API para retornar 200 e [])')
+                  print(f'❌ Erro HTTP Fatal: {e.code} - {e.reason}. (Verifique se sua rota aceita POST)')
                   sys.exit(1)
               except Exception as e:
                   print(f'❌ Erro Inesperado: {e}')
