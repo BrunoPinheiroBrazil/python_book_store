@@ -176,8 +176,8 @@ jobs:
 
           # --- CONFIGURAÇÃO ---
           BASE_URL = 'http://localhost:5002/api/livros'
-          ID_EXISTENTE = 6          # Ajuste conforme seu DB
-          TITULO_ESPERADO = 'Python' # Ajuste conforme seu DB
+          ID_EXISTENTE = 6
+          TITULO_ESPERADO = 'Python'
           ID_INEXISTENTE = 999
           ID_INVALIDO = 'abc'
 
@@ -249,3 +249,9 @@ jobs:
           validar_get_id(ID_INEXISTENTE, 'NAO_ENCONTRADO')
           validar_get_id(ID_INVALIDO, 'ID_INVALIDO')
           "
+      # 6. Faz o Request GET para testar
+      # O curl -f faz o step falhar se o status code não for 2xx
+      # O curl -v mostra os detalhes no log
+      - name: Testar Endpoint (Get Autores)
+        run: |
+          curl -v -f http://localhost:5002/api/autores

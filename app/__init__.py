@@ -1,6 +1,7 @@
 from flask import Flask
 from flasgger import Swagger
-from .controllers.livro_controller import controllers
+from .controllers.livro_controller import livroControllers
+from .controllers.autores_controller import autorControllers
 
 def create_app() :
     app = Flask(__name__)
@@ -25,6 +26,7 @@ def create_app() :
     Swagger(app, swagger_config)
     
     # Registra as rotas com prefixo /api
-    app.register_blueprint(controllers, url_prefix='/api')
+    app.register_blueprint(livroControllers, url_prefix='/api')
+    app.register_blueprint(autorControllers, url_prefix='/api')
     
     return app

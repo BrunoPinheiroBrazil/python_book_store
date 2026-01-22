@@ -2,12 +2,12 @@ from flask import Blueprint, request, jsonify
 from ..services.livro_services import LivroService
 
 # Cria o Blueprint
-controllers = Blueprint('livros', __name__)
+livroControllers = Blueprint('livros', __name__)
 
 # Instancia o serviço
 service = LivroService()
 
-@controllers.route('/livros', methods=['GET'])
+@livroControllers.route('/livros', methods=['GET'])
 def obter_livros():
     """
     Lista todos os livros
@@ -21,7 +21,7 @@ def obter_livros():
     resposta, status = service.listar_todos()
     return jsonify(resposta), status
 
-@controllers.route('/livros/<id_livro>', methods=['GET'])
+@livroControllers.route('/livros/<id_livro>', methods=['GET'])
 def obter_livro(id_livro):
     """
     Obtém um livro específico por ID
@@ -45,7 +45,7 @@ def obter_livro(id_livro):
     resposta, status = service.pesquisar_por_id(id_livro)
     return jsonify(resposta), status
 
-@controllers.route('/livros', methods=['POST'])
+@livroControllers.route('/livros', methods=['POST'])
 def livros():
     """
     Cria um novo livro
@@ -79,7 +79,7 @@ def livros():
     # Se a resposta for vazia (caso do 201), jsonify lida bem
     return jsonify(resposta) if resposta else ('', status)
 
-@controllers.route('/livros/<id_livro>', methods=['DELETE']) #o nome do parâmetro na rota deve ser identico ao parametro no método.
+@livroControllers.route('/livros/<id_livro>', methods=['DELETE']) #o nome do parâmetro na rota deve ser identico ao parametro no método.
 def deletar_livro(id_livro : int):
     """
     Apaga um livro específico pelo ID
@@ -104,7 +104,7 @@ def deletar_livro(id_livro : int):
     resposta, status = service.apagar_livro_por_id(id_livro)
     return jsonify(resposta), status
 
-@controllers.route('/livros/buscar', methods=['POST'])
+@livroControllers.route('/livros/buscar', methods=['POST'])
 def buscar_livros_por_titulo():
     """
     Busca livros por título

@@ -1,66 +1,82 @@
 import json
 import os
 
-# --- A MÁGICA ACONTECE AQUI ---
-# 1. __file__ é o caminho deste arquivo (persistence.py)
-# 2. abspath garante que o caminho seja absoluto (c:\users\...\persistence.py)
-# 3. dirname pega apenas a pasta onde o arquivo está (...\app\repositories)
 DIRETORIO_ATUAL = os.path.dirname(os.path.abspath(__file__))
-
-# Agora montamos o caminho do JSON baseado na pasta deste arquivo
 ARQUIVO_DB = os.path.join(DIRETORIO_ATUAL, 'banco_dados.json')
 
 class banco:
-    def ler_livros():
-        """Lê o arquivo JSON e retorna a lista de livros."""
-        # Se o arquivo não existir, retorna lista vazia
+    
+    # --- MÉTODOS PRIVADOS (Auxiliares) ---
+    def _ler_arquivo_completo():
         if not os.path.exists(ARQUIVO_DB):
-            return [] 
+            return {"livros": [], "autores": []}
         
         try:
             with open(ARQUIVO_DB, 'r', encoding='utf-8') as arquivo:
-                return json.load(arquivo)
+                dados = json.load(arquivo)
+                # Garante integridade das chaves
+                if "livros" not in dados: dados["livros"] = []
+                if "autores" not in dados: dados["autores"] = []
+                return dados
         except json.JSONDecodeError:
-            return []
+            return {"livros": [], "autores": []}
+
+    def _salvar_arquivo_completo(dados_completos):
+        with open(ARQUIVO_DB, 'w', encoding='utf-8') as arquivo:
+            json.dump(dados_completos, arquivo, indent=2, ensure_ascii=False)
+
+    # --- LIVROS ---
+    def ler_livros():
+        dados = banco._ler_arquivo_completo()
+        return dados["livros"]
 
     def salvar_livro(novo_livro):
-        """Lê os livros atuais, adiciona o novo e salva tudo de volta."""
-        lista_livros = banco.ler_livros()
-        lista_livros.append(novo_livro)
-        
-        # Não precisamos mais criar a pasta com os.makedirs, 
-        # pois se este script está rodando, a pasta app/repositories já existe.
+        dados_completos = banco._ler_arquivo_completo()
+        dados_completos["livros"].append(novo_livro)
+        banco._salvar_arquivo_completo(dados_completos)
 
-        with open(ARQUIVO_DB, 'w', encoding='utf-8') as arquivo:
-            json.dump(lista_livros, arquivo, indent=2, ensure_ascii=False)
+    def buscar_livro_por_titulo(titulo: str):
+        lista_livros = banco.ler_livros()
+        if not titulo: return [], 200
+        
+        return [l for l in lista_livros if titulo.lower() in l.get('titulo', '').lower()]
 
     def apagar_livro(id_livro) -> bool:
-        """Apaga um livro específico pelo ID."""
-        lista_livros = banco.ler_livros()
+        dados_completos = banco._ler_arquivo_completo()
+        lista_livros = dados_completos["livros"]
+        
+        # Filtra removendo o item desejado
+        nova_lista = [l for l in lista_livros if int(l.get('id')) != int(id_livro)]
+        
+        if len(nova_lista) == len(lista_livros):
+            return False # Nada foi apagado
 
-        #lista_atualizada = [livro for livro in lista_livros if livro.get('id') != id_livro]
-        lista_atualizada = []
-        for livro in lista_livros:
-            print("if livro.get('id') != id_livro: " + str(livro.get('id')) + " != " + str(id_livro) + " = " + str(livro.get('id') != int(id_livro)))
-            if (int(livro.get('id')) != int(id_livro)):
-                lista_atualizada.append(livro)
-        
-        if(len(lista_livros) == len(lista_atualizada)):
-            return False;
+        dados_completos["livros"] = nova_lista
+        banco._salvar_arquivo_completo(dados_completos)
+        return True
 
-        with open(ARQUIVO_DB, 'w', encoding='utf-8') as arquivo:
-            json.dump(lista_atualizada, arquivo, indent=2, ensure_ascii=False)
+    # --- AUTORES (NOVO) ---
+    
+    def ler_autores():
+        """Retorna apenas a lista de autores."""
+        dados = banco._ler_arquivo_completo()
+        return dados["autores"]
+
+    def salvar_autor(novo_autor):
+        """Salva um autor e gera ID automático se não tiver."""
+        dados_completos = banco._ler_arquivo_completo()
         
-        return True;
+        # Lógica de Auto-Incremento de ID para Autor
+        lista_autores = dados_completos["autores"]
         
-    def buscar_livro_por_titulo(titulo: str):
-        """Busca livros que contêm o título especificado (case-insensitive)."""
-        lista_livros = banco.ler_livros()
-        titulo_lower = titulo.lower()
-        livros_encontrados = [
-            livro for livro in lista_livros 
-            if titulo_lower in livro.get('titulo', '').lower()
-        ]
-        if not titulo:
-            return [],200
-        return livros_encontrados
+        if not novo_autor.get('id'):
+            if len(lista_autores) > 0:
+                # Pega o ID do último da lista e soma 1
+                novo_id = lista_autores[-1].get('id', 0) + 1
+            else:
+                novo_id = 1
+            novo_autor['id'] = novo_id
+
+        dados_completos["autores"].append(novo_autor)
+        banco._salvar_arquivo_completo(dados_completos)
+        return novo_autor # Retorna com o ID gerado
