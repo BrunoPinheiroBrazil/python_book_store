@@ -167,3 +167,85 @@ jobs:
           # 2. Busca que NÃO DEVE ter itens, mas DEVE ser 200 OK (Cobol)
           testar_cenario('Cobol', deve_encontrar_itens=False)
           "
+
+      # 9. Testes de GET por ID (Sucesso, 404 e Validação de Tipo)
+      - name: Validar Busca de Livro por ID
+        run: |
+          python3 -c "
+          import sys, json, urllib.request, urllib.error
+
+          # --- CONFIGURAÇÃO ---
+          BASE_URL = 'http://localhost:5002/api/livros'
+          ID_EXISTENTE = 6          # Ajuste conforme seu DB
+          TITULO_ESPERADO = 'Python' # Ajuste conforme seu DB
+          ID_INEXISTENTE = 999
+          ID_INVALIDO = 'abc'
+
+          def validar_get_id(id_teste, cenario):
+              url = f'{BASE_URL}/{id_teste}'
+              print(f'🔍 [{cenario}] GET em: {url}')
+
+              try:
+                  with urllib.request.urlopen(url) as response:
+                      status = response.getcode()
+                      body = json.loads(response.read().decode())
+                      
+                      # --- CENÁRIO 1: HAPPY PATH (Sucesso) ---
+                      if cenario == 'SUCESSO':
+                          if status != 200:
+                              print(f'❌ Falha: Esperava 200, recebeu {status}')
+                              sys.exit(1)
+                          
+                          # Valida dados do JSON
+                          if body.get('id') != ID_EXISTENTE:
+                              print(f'❌ Falha: ID retornado ({body.get("id")}) diferente do pedido ({ID_EXISTENTE})')
+                              sys.exit(1)
+                          
+                          if body.get('titulo') != TITULO_ESPERADO:
+                              print(f'❌ Falha: Título incorreto. Veio: {body.get("titulo")}')
+                              sys.exit(1)
+                              
+                          print(f'✅ Sucesso: Livro {ID_EXISTENTE} retornado corretamente.')
+                          return
+
+                      # Se cair aqui num cenário de ERRO (ex: esperava 404 mas veio 200), falha
+                      if cenario in ['NAO_ENCONTRADO', 'ID_INVALIDO']:
+                          print(f'❌ Falha: Esperava erro (404/400), mas a API retornou 200 OK para ID {id_teste}.')
+                          sys.exit(1)
+
+              except urllib.error.HTTPError as e:
+                  body_erro = e.read().decode()
+                  
+                  # --- CENÁRIO 2: NÃO ENCONTRADO (404) ---
+                  if cenario == 'NAO_ENCONTRADO':
+                      if e.code == 404:
+                          # Opcional: Validar mensagem de erro no body
+                          print(f'✅ Sucesso: Recebeu 404 corretamente para ID {id_teste}.')
+                      else:
+                          print(f'❌ Falha: Esperava 404, recebeu {e.code}.')
+                          sys.exit(1)
+
+                  # --- CENÁRIO 3: ID INVÁLIDO (400 ou 404) ---
+                  elif cenario == 'ID_INVALIDO':
+                      if e.code in [400, 404]: # Aceita ambos conforme sua regra
+                          print(f'✅ Sucesso: Recebeu status de erro {e.code} para ID inválido.')
+                      else:
+                          print(f'❌ Falha: Status inesperado para ID texto: {e.code}.')
+                          sys.exit(1)
+                  
+                  # Se der erro no cenário de SUCESSO
+                  elif cenario == 'SUCESSO':
+                      print(f'❌ Falha: Esperava 200, mas deu erro {e.code}.')
+                      sys.exit(1)
+
+              except Exception as e:
+                  print(f'❌ Erro Inesperado: {e}')
+                  sys.exit(1)
+              
+              print('---')
+
+          # --- EXECUÇÃO ---
+          validar_get_id(ID_EXISTENTE, 'SUCESSO')
+          validar_get_id(ID_INEXISTENTE, 'NAO_ENCONTRADO')
+          validar_get_id(ID_INVALIDO, 'ID_INVALIDO')
+          "
