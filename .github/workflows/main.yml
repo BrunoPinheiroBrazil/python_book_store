@@ -47,3 +47,49 @@ jobs:
       - name: Testar Endpoint (Get Livros)
         run: |
           curl -v -f http://localhost:5002/api/livros
+
+      # 7. Valida o conteúdo do JSON (Array e Propriedades)
+      - name: Validar Conteúdo do JSON
+        run: |
+          # O curl -s (silent) é importante para não sujar o output com barra de progresso
+          curl -s -f http://localhost:5002/api/livros | python3 -c "
+          import sys, json
+          
+          try:
+              # Lê o JSON que veio do curl
+              data = json.load(sys.stdin)
+              
+              # 1. Testa se é uma lista (Array)
+              if not isinstance(data, list):
+                  print('❌ Erro: O retorno não é um Array.')
+                  sys.exit(1)
+              
+              # (Opcional) Testa se o array não está vazio
+              if len(data) == 0:
+                  print('⚠️ Aviso: O array está vazio, não há itens para testar.')
+                  sys.exit(0)
+
+              # 2. Pega o primeiro item
+              primeiro_item = data[0]
+              
+              # 3. Testa as propriedades obrigatórias
+              chaves_obrigatorias = ['id', 'titulo', 'descricao']
+              erro = False
+              
+              for chave in chaves_obrigatorias:
+                  if chave not in primeiro_item:
+                      print(f'❌ Erro: A propriedade \'{chave}\' não foi encontrada no primeiro item.')
+                      erro = True
+              
+              if erro:
+                  sys.exit(1)
+                  
+              print('✅ Sucesso: O JSON é um array válido e contém as chaves esperadas.')
+              
+          except json.JSONDecodeError:
+              print('❌ Erro: A resposta não é um JSON válido.')
+              sys.exit(1)
+          except Exception as e:
+              print(f'❌ Erro inesperado: {e}')
+              sys.exit(1)
+          "
