@@ -270,3 +270,18 @@ jobs:
       - name: Testar Endpoint (Get Autor Criado)
         run: |
           curl -v -f http://localhost:5002/api/autores/9999
+
+      # 13. Testa um ID inexistente (Deve retornar 404)
+      - name: Testar Endpoint (Autor Inexistente - 404)
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5002/api/autores/999999)
+          
+          echo "Status Code retornado: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -eq 404 ]; then
+            echo "Sucesso: API retornou 404 como esperado."
+            exit 0
+          else
+            echo "Erro: Esperava 404, mas recebeu $HTTP_CODE"
+            exit 1
+          fi
