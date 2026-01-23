@@ -3,7 +3,7 @@ name: Teste de API e Health Check
 # Roda em todo push ou pode ser acionado manualmente
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' 
+          python-version: "3.11"
 
       # 3. Instala as dependências (certifique-se de ter um requirements.txt)
       - name: Instalar dependências necessárias
@@ -54,7 +54,7 @@ jobs:
           # O curl -s (silent) é importante para não sujar o output com barra de progresso
           curl -s -f http://localhost:5002/api/livros | python3 -c "
           import sys, json
-          
+
           try:
               # Lê o JSON que veio do curl
               data = json.load(sys.stdin)
@@ -160,7 +160,7 @@ jobs:
               print('---')
 
           # --- EXECUÇÃO DOS CENÁRIOS ---
-          
+
           # 1. Busca que DEVE ter sucesso (Python)
           testar_cenario('Python', deve_encontrar_itens=True)
 
@@ -249,9 +249,24 @@ jobs:
           validar_get_id(ID_INEXISTENTE, 'NAO_ENCONTRADO')
           validar_get_id(ID_INVALIDO, 'ID_INVALIDO')
           "
-      # 6. Faz o Request GET para testar
+      # 10. Faz o Request GET para testar
       # O curl -f faz o step falhar se o status code não for 2xx
       # O curl -v mostra os detalhes no log
       - name: Testar Endpoint (Get Autores)
         run: |
           curl -v -f http://localhost:5002/api/autores
+
+      # 11. Insere o dado novo no arquivo JSON
+      - name: Preparar Massa de Dados (Inserir Autor Extra)
+        run: |
+          NOVO_AUTOR='{"id": 9999, "nome": "Autor Teste CI", "nacionalidade": "Brasil", "genero": "M"}'
+          
+          jq --argjson novo "$NOVO_AUTOR" '.autores += [$novo]' app/repositories/banco_dados.json > temp.json && mv temp.json app/repositories/banco_dados.json
+          
+          echo "Arquivo JSON atualizado:"
+          cat app/repositories/banco_dados.json
+
+      # 12. Faz o Request GET buscando especificamente o ID criado (9999)
+      - name: Testar Endpoint (Get Autor Criado)
+        run: |
+          curl -v -f http://localhost:5002/api/autores/9999

@@ -23,6 +23,7 @@
   ],
   "autores": [
     {
+      "id": 1,
       "nome": "J. R. R. Tolkien",
       "nacionalidade": "Inglaterra",
       "genero": "M"
