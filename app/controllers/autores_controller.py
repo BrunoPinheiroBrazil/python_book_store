@@ -22,3 +22,17 @@ def obter_autores():
     """
     resposta, status = service.listar_autores()
     return jsonify(resposta), status
+
+@autorControllers.route('/autores/<idlivro>', methods=['GET'])
+def obter_autor(idlivro):
+    """
+    Pesquisa autor por ID
+    ---
+    tags:
+      - Autores
+    responses:
+      200:
+        description: pesquisa retornada com sucesso
+    """
+    resposta, status = service.pesquisar_autor(idlivro)
+    return jsonify(resposta), status
