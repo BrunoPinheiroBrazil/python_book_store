@@ -285,3 +285,54 @@ jobs:
             echo "Erro: Esperava 404, mas recebeu $HTTP_CODE"
             exit 1
           fi
+
+  # -------------------------------------------------------------------------
+  # NOVO JOB: Faz o deploy na AWS apenas se o job 'build-and-test' passar
+  # -------------------------------------------------------------------------
+  deploy-aws:
+    name: Deploy na EC2 (AWS)
+    needs: build-and-test # Amarra o deploy ao sucesso dos testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # 1. Copia todos os arquivos do repositório para a máquina da AWS
+      - name: Enviar arquivos via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "/home/ubuntu/api-livros"
+          # Ignora a pasta do git para não pesar a transferência
+          strip_components: 0
+          
+      # 2. Conecta via SSH, mata a API velha, instala dependências e sobe a nova
+      - name: Executar comandos na EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/api-livros
+            
+            # Derruba a instância atual da API se estiver rodando
+            echo "Derrubando API antiga..."
+            pkill -f "python main.py" || echo "Nenhuma API antiga rodando."
+            
+            # Prepara o ambiente virtual
+            echo "Atualizando ambiente e instalando dependências..."
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            
+            # Sobe a API nova em modo daemon (background)
+            echo "Iniciando a nova versão da API..."
+            nohup python main.py > api.log 2>&1 &
+            
+            echo "🚀 Deploy finalizado com sucesso! A nova versão já está rodando."
