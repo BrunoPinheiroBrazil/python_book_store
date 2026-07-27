@@ -320,9 +320,9 @@ jobs:
           script: |
             cd /home/ubuntu/api-livros
             
-            # Derruba a instância atual da API se estiver rodando
-            echo "Derrubando API antiga..."
-            pkill -f "[p]ython main.py" || echo "Nenhuma API antiga rodando."
+            # Derruba qualquer processo que estiver segurando a porta 5002 (Bulletproof)
+            echo "Liberando a porta 5002..."
+            fuser -k 5002/tcp || echo "A porta já estava livre."
             
             # Prepara o ambiente virtual
             echo "Atualizando ambiente e instalando dependências..."
@@ -331,7 +331,7 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
             
-            # Sobe a API nova em modo daemon (background) totalmente desatrelada do SSH
+            # Sobe a API nova em background
             echo "Iniciando a nova versão da API..."
             nohup python main.py > api.log 2>&1 < /dev/null &
             
