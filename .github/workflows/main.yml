@@ -322,7 +322,7 @@ jobs:
             
             # Derruba a instância atual da API se estiver rodando
             echo "Derrubando API antiga..."
-            pkill -f "python main.py" || echo "Nenhuma API antiga rodando."
+            pkill -f "[p]ython main.py" || echo "Nenhuma API antiga rodando."
             
             # Prepara o ambiente virtual
             echo "Atualizando ambiente e instalando dependências..."
@@ -331,8 +331,8 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
             
-            # Sobe a API nova em modo daemon (background)
+            # Sobe a API nova em modo daemon (background) totalmente desatrelada do SSH
             echo "Iniciando a nova versão da API..."
-            nohup python main.py > api.log 2>&1 &
+            nohup python main.py > api.log 2>&1 < /dev/null &
             
             echo "🚀 Deploy finalizado com sucesso! A nova versão já está rodando."
